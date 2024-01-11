@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { usePathname } from "next/navigation";
 
-const UserProfile = async () => {
+const UserProfile = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [newMessage, setNewMessage] = useState("");
@@ -15,7 +15,7 @@ const UserProfile = async () => {
   const handleSendMessage = async () => {
     try {
       // Implement logic to send messages to the user with profileCode
-      await axios.post(`http://localhost:5000/send-message${pathname}`, {
+      await axios.post(`http://localhost:5000/send-message/${pathname}`, {
         text: newMessage,
       });
 
@@ -26,14 +26,6 @@ const UserProfile = async () => {
       // Handle error or redirect as needed
     }
   };
-
-  const sendMessageURL = `http://localhost:5000/send-message${pathname}`;
-  console.log("Sending message to:", sendMessageURL);
-
-  // Now make the request
-  await axios.post(sendMessageURL, {
-    text: newMessage,
-  });
 
   return (
     <div>
