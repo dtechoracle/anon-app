@@ -12,20 +12,20 @@ const UserProfile = async () => {
 
   console.log("Current pathname:", pathname);
 
-  // const handleSendMessage = async () => {
-  //   try {
-  //     // Implement logic to send messages to the user with profileCode
-  //     await axios.post(`http://localhost:5000/send-message/${pathname}`, {
-  //       text: newMessage,
-  //     });
+  const handleSendMessage = async () => {
+    try {
+      // Implement logic to send messages to the user with profileCode
+      await axios.post(`http://localhost:5000/send-message${pathname}`, {
+        text: newMessage,
+      });
 
-  //     // Handle success or redirect as needed
-  //     console.log("Message sent successfully");
-  //   } catch (error) {
-  //     console.error("Error sending message", error);
-  //     // Handle error or redirect as needed
-  //   }
-  // };
+      // Handle success or redirect as needed
+      console.log("Message sent successfully");
+    } catch (error) {
+      console.error("Error sending message", error);
+      // Handle error or redirect as needed
+    }
+  };
 
   const sendMessageURL = `http://localhost:5000/send-message${pathname}`;
   console.log("Sending message to:", sendMessageURL);
