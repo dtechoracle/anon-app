@@ -37,19 +37,9 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 // JWT secret key (replace 'your-secret-key' with a strong, unique key)
-// Middleware to verify JWT
 const verifyToken = (req, res, next) => {
-  const authorizationHeader = req.header("Authorization");
-
-  if (!authorizationHeader) {
-    return res.status(401).json({ message: "Access denied" });
-  }
-
-  const [tokenType, token] = authorizationHeader.split(" ");
-
-  if (!tokenType || !token || tokenType.toLowerCase() !== "bearer") {
-    return res.status(401).json({ message: "Invalid token format" });
-  }
+  const token = req.header("Authorization");
+  if (!token) return res.status(401).json({ message: "Access denied" });
 
   try {
     const decoded = jwt.verify(token, secretKey);
