@@ -25,10 +25,9 @@ mongoose.connect("mongodb://localhost:27017/anonymous-webapp", {
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
   password: { type: String, required: true },
-  profileLink: { type: String, unique: true },
   messages: [
     {
-      from: { type: String, required: true },
+      from: { type: String, required: false }, // 'from' is marked as required
       text: { type: String, required: true },
       timestamp: { type: Date, default: Date.now },
     },
@@ -38,12 +37,19 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 // JWT secret key (replace 'your-secret-key' with a strong, unique key)
-const secretKey = "your-secret-key";
-
 // Middleware to verify JWT
 const verifyToken = (req, res, next) => {
-  const token = req.header("Authorization");
-  if (!token) return res.status(401).json({ message: "Access denied" });
+  const authorizationHeader = req.header("Authorization");
+
+  if (!authorizationHeader) {
+    return res.status(401).json({ message: "Access denied" });
+  }
+
+  const [tokenType, token] = authorizationHeader.split(" ");
+
+  if (!tokenType || !token || tokenType.toLowerCase() !== "bearer") {
+    return res.status(401).json({ message: "Invalid token format" });
+  }
 
   try {
     const decoded = jwt.verify(token, secretKey);
@@ -63,7 +69,6 @@ app.post("/register", async (req, res) => {
     const user = new User({
       username,
       password,
-      profileLink: generateProfileLink(),
     });
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
@@ -90,31 +95,32 @@ app.post("/login", async (req, res) => {
 // Get user profile
 app.get("/profile", verifyToken, async (req, res) => {
   try {
-    // Fetch user profile based on req.user.username
     const user = await User.findOne({ username: req.user.username });
-    res.json({ username: user.username, profileLink: user.profileLink });
+    res.json({ username: user.username, profileLink: user.username });
   } catch (error) {
     res.status(500).json({ message: "Error fetching user profile" });
   }
 });
 
 // Send message
-// Backend
-app.post("/send-message/:profileCode", async (req, res) => {
+app.post("/send-message/:username", async (req, res) => {
   try {
-    const { profileCode } = req.params;
+    const { username } = req.params;
     const { text } = req.body;
 
-    const toUser = await User.findOne({ profileCode });
+    const toUser = await User.findOne({ username });
 
-    if (!toUser) return res.status(404).json({ message: "User not found" });
+    if (!toUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     toUser.messages.push({ text });
     await toUser.save();
 
-    res.json({ message: "Message sent successfully" });
+    return res.json({ message: "Message sent successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error sending message" });
+    console.error(error);
+    return res.status(500).json({ message: "Error sending message" });
   }
 });
 
@@ -127,12 +133,6 @@ app.get("/messages", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Error fetching messages" });
   }
 });
-
-// Function to generate a unique profile link (replace with your own logic)
-const generateProfileLink = () => {
-  // Implement your logic to generate a unique profile link
-  return Math.random().toString(36).substr(2, 10);
-};
 
 // Start the server
 app.listen(PORT, () => {

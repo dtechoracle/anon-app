@@ -10,12 +10,12 @@ const UserProfile = () => {
   const pathname = usePathname();
   const [newMessage, setNewMessage] = useState("");
 
-  console.log("Current pathname:", pathname);
+  // console.log("Current pathname:", pathname);
 
   const handleSendMessage = async () => {
     try {
       // Implement logic to send messages to the user with profileCode
-      await axios.post(`http://localhost:5000/send-message/${pathname}`, {
+      await axios.post(`http://localhost:5000/send-message${pathname}`, {
         text: newMessage,
       });
 

@@ -7,10 +7,15 @@ const ViewMessages = () => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    // Fetch messages on component mount
     const fetchMessages = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/messages");
+        const response = await axios.get("http://localhost:5000/messages", {
+          headers: {
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImplcnJ5eXkiLCJpYXQiOjE3MDUwNjExOTl9.YwiExZyOB-SvN4pXcwYiOpBzVgefouhjnwZcBUm4Zkg",
+          },
+        });
+
         setMessages(response.data);
       } catch (error) {
         console.error("Error fetching messages", error);
